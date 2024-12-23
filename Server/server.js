@@ -12,16 +12,16 @@ const port = 8080;
 app.use(cors());
 app.use(express.json());
 
-// connection
+// connection to MongoDB
 mongoose
   .connect("mongodb://localhost:27017/logicLoop", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => console.log("connected to database"))
-  .catch((err) => console.log("failed to connect mongodb", err));
+  .catch((err) => console.log("failed to connect to MongoDB", err));
 
-// schema - structure
+// User Schema
 const userSchema = new mongoose.Schema({
   username: String,
   email: String,
@@ -29,9 +29,21 @@ const userSchema = new mongoose.Schema({
   profilePicture: String
 });
 
-// modal
-const User = mongoose.model("Users", userSchema);
+// Blog Schema
+const blogSchema = new mongoose.Schema({
+  title: String,
+  author: String,
+  content: String,
+  category: String,
+  image: String,
+  publishedDate: String,
+  tags: [String],
+  comments: [{ user: String, comment: String, date: String }],
+});
 
+// Models
+const User = mongoose.model("Users", userSchema);
+const BlogPosts = mongoose.model("BlogPosts", blogSchema);
 
 // Configure multer for image upload
 const storage = multer.diskStorage({
@@ -46,7 +58,7 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const fileTypes = /jpeg|jpg|png/; 
+  const fileTypes = /jpeg|jpg|png/;
   const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = fileTypes.test(file.mimetype);
 
@@ -73,7 +85,6 @@ app.post("/signup", upload.single("image"), async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new User({ username, email, password: hashedPassword, profilePicture });
-
     await newUser.save();
     res.status(201).send("User created successfully");
   } catch (err) {
@@ -105,10 +116,17 @@ app.post("/signin", async (req, res) => {
   }
 });
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+// Fetch all blog posts
+app.get("/", async (req, res) => {
+  try {
+    const blogs = await BlogPost.find();
+    res.json(blogs);
+  } catch (err) {
+    res.status(500).send("Error fetching blogs: " + err.message);
+  }
 });
 
+// Start the server
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}!`);
+  console.log(`Server is running on http://localhost:${port}`);
 });

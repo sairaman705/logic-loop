@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Navbar from "./Components/Navbar";
 import SignIn from "./Pages/SignIn";
 import SignUp from "./Pages/SignUp";
+import Home from "./Pages/Home";
 
 function App() {
   //const [currentPage, setCurrentPage] = useState("home");
@@ -17,7 +18,7 @@ function App() {
           path="/"
           element={
             isAuthenticated ? (
-              <div>Welcome to the Home Page</div>
+              <Home />
             ) : (
               <Navigate to="/" replace />
             )
