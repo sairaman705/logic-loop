@@ -1,15 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function SignIn({ setCurrentPage, setIsAuthenticated }) {
+function SignIn({ setIsAuthenticated }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setCurrentPage("signin");
-  }, [setCurrentPage]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -5,12 +5,12 @@ import SignIn from "./Pages/SignIn";
 import SignUp from "./Pages/SignUp";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("home");
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication status
+  //const [currentPage, setCurrentPage] = useState("home");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   return (
     <Router>
-      <Navbar currentPage={currentPage} />
+      <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
       <Routes>
         {/* Home Route */}
         <Route
@@ -19,7 +19,7 @@ function App() {
             isAuthenticated ? (
               <div>Welcome to the Home Page</div>
             ) : (
-              <Navigate to="/signin" replace />
+              <Navigate to="/" replace />
             )
           }
         />
@@ -27,13 +27,13 @@ function App() {
         {/* Sign In Route */}
         <Route
           path="/signin"
-          element={<SignIn setCurrentPage={setCurrentPage} setIsAuthenticated={setIsAuthenticated} />}
+          element={<SignIn setIsAuthenticated={setIsAuthenticated} />}
         />
 
         {/* Sign Up Route */}
         <Route
           path="/signup"
-          element={<SignUp setCurrentPage={setCurrentPage} />}
+          element={<SignUp />}
         />
 
         {/* Catch-All Route for 404 */}
