@@ -8,7 +8,7 @@ const Home = () => {
     // Fetch blog posts from the backend
     axios.get('http://localhost:8080/')
       .then((response) => {
-        console.log('Blog posts:', response.data); // Log the fetched blogs
+        console.log('Blog posts:', response.data); 
         setBlogs(response.data);
       })
       .catch((error) => {

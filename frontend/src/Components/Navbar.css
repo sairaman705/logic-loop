@@ -87,6 +87,11 @@
     color: #333;
 }
 
+.logout-btn{
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {

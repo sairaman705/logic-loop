@@ -16,13 +16,7 @@ function App() {
         {/* Home Route */}
         <Route
           path="/"
-          element={
-            isAuthenticated ? (
-              <Home />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
+          element={ <Home />}
         />
 
         {/* Sign In Route */}
