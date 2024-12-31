@@ -1,43 +1,39 @@
-import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { SessionProvider } from "./UserAuth";
 import Navbar from "./Components/Navbar";
 import SignIn from "./Pages/SignIn";
 import SignUp from "./Pages/SignUp";
+import WritePage from "./WritePage";
 import Home from "./Pages/Home";
 
 function App() {
-  //const [currentPage, setCurrentPage] = useState("home");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const LocationBasedNavbar = ({ children }) => {
+    const location = useLocation();
+    return (
+      <>
+        {/* Render Navbar only if not on the Write page */}
+        {location.pathname !== "/write" && <Navbar />}
+        {children}
+      </>
+    );
+  };
 
   return (
-    <Router>
-      <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
-      <Routes>
-        {/* Home Route */}
-        <Route
-          path="/"
-          element={ <Home />}
-        />
-
-        {/* Sign In Route */}
-        <Route
-          path="/signin"
-          element={<SignIn setIsAuthenticated={setIsAuthenticated} />}
-        />
-
-        {/* Sign Up Route */}
-        <Route
-          path="/signup"
-          element={<SignUp />}
-        />
-
-        {/* Catch-All Route for 404 */}
-        <Route
-          path="*"
-          element={<div>404 - Page Not Found</div>}
-        />
-      </Routes>
-    </Router>
+    <SessionProvider>
+      <Router>
+        <LocationBasedNavbar>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/write" element={<WritePage />} />
+            
+            <Route path="*" element={<div>404 - Page Not Found</div>} />
+          </Routes>
+        </LocationBasedNavbar>
+      </Router>
+    </SessionProvider>
   );
 }
 

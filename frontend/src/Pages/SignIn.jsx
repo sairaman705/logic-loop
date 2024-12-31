@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import {useSession} from "../UserAuth";
 
-function SignIn({ setIsAuthenticated }) {
+function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { setIsAuthenticated } = useSession();
   const navigate = useNavigate();
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userDetails = {
