@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -6,26 +7,28 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const session = require("express-session");
+const MongoStore = require('connect-mongo');
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: process.env.CLIENT_URL || "http://localhost:3000",
   methods: ["GET", "POST", "OPTIONS"],
   credentials: true,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
-  secret: "bonjure",
+  secret: process.env.SESSION_SECRET || "bonjure",
   resave: false, 
-  saveUninitialized: true,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI || "mongodb://localhost:27017/logicLoop" }),
   cookie: {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
+    maxAge: 1000 * 60 * 60 * 24, 
   },
 }));
 
@@ -33,7 +36,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // MongoDB connection
 mongoose
-  .connect("mongodb://localhost:27017/logicLoop", {
+  .connect(process.env.MONGO_URI || "mongodb://localhost:27017/logicLoop", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -131,6 +134,7 @@ app.post("/signin", async (req, res) => {
 
     // Save user info in session
     req.session.user = { id: user._id, username: user.username };
+    console.log("Session after login:", req.session);
     res.status(200).send("Login successful");
   } catch (err) {
     res.status(500).send("Error during login: " + err.message);
@@ -139,6 +143,7 @@ app.post("/signin", async (req, res) => {
 
 // Check Session Route
 app.get("/check-session", (req, res) => {
+  console.log("Session data:", req.session);
   if (req.session && req.session.user) {
     res.status(200).json({ isAuthenticated: true, user: req.session.user });
   } else {
@@ -153,6 +158,7 @@ app.post("/logout", (req, res) => {
       if (err) {
         return res.status(500).send("Error logging out");
       }
+      res.clearCookie("connect.sid");
       res.status(200).send("Logged out successfully");
     });
   } else {
@@ -209,9 +215,9 @@ app.post("/add-blog", upload.single("thumbnail"), async (req, res) => {
 });
 
 // Error Handling Middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something went wrong!");
+app.use((req, res, next) => {
+  console.log("session info : ", req.session);
+  next();
 });
 
 // Start the server

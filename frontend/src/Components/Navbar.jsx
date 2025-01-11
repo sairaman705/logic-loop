@@ -12,8 +12,9 @@ const Navbar = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // Make sure the correct URL is used for the backend server (http://localhost:8080)
         const response = await axios.get("http://localhost:8080/check-session", {
-          withCredentials: true,
+          withCredentials: true,  // Ensure cookies are sent with the request
         });
         setIsAuthenticated(response.data.isAuthenticated);
       } catch (error) {
@@ -26,26 +27,32 @@ const Navbar = () => {
   }, [setIsAuthenticated]);
 
   const handleLogout = async () => {
-    if (!isAuthenticated) {
-      console.log("No active session to log out");
-      return;
-    }
-
     try {
-      await axios.post("http://localhost:8080/logout", null, {
+      // Before calling logout, check if the user is authenticated
+      const sessionResponse = await axios.get("http://localhost:8080/check-session", {
         withCredentials: true,
       });
-      setIsAuthenticated(false);
-      navigate("/");
+
+      if (sessionResponse.data.isAuthenticated) {
+        // If authenticated, proceed with logout
+        const logoutResponse = await axios.post("http://localhost:8080/logout", {}, {
+          withCredentials: true,  // Send the credentials with the logout request
+        });
+        console.log("Logout successful:", logoutResponse.data);
+        setIsAuthenticated(false);  // Update authentication status
+        navigate("/");  // Redirect to home page or login page after logout
+      } else {
+        console.log("No active session to log out");
+      }
     } catch (error) {
-      console.log("Logout error:", error);
+      console.error("Logout error:", error.response?.data || error.message);
     }
   };
 
   return (
     <nav className="navbar">
       <Link to="/" className="logo">
-        <img src="/Images/logo.png" alt="Logo" />
+        <img src="/Images/logo1.jpg" alt="Logo" />
       </Link>
 
       {location.pathname === "/" && (
@@ -58,27 +65,31 @@ const Navbar = () => {
       )}
 
       <div className="buttons-action">
-        <button className="write-btn">
+        <div className="write-btn">
           <Link className="write" to="/write">
             <i className="bx bx-pen"></i>
-            Write
+            <span>Write</span>
           </Link>
-        </button>
+        </div>
         {isAuthenticated ? (
           <>
-            <button className="logout-btn" onClick={handleLogout}>
+            <div className="logout-btn" onClick={handleLogout}>
               <i className="bx bx-log-out"></i>
-              Logout
-            </button>
+              <span>Logout</span>
+            </div>
           </>
         ) : (
           <div className="authentication-button">
-            <Link className="signIn-btn" to="/signin">
-              Sign In
-            </Link>
-            <Link className="signUp-btn" to="/signup">
-              Sign Up
-            </Link>
+            <div>
+              <Link className="signIn-btn" to="/signin">
+                <span>Sign In</span>
+              </Link>
+            </div>
+            <div>
+              <Link className="signUp-btn" to="/signup">
+                <span>Sign Up</span>
+              </Link>
+            </div>
           </div>
         )}
       </div>
