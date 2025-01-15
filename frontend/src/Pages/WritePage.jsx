@@ -27,38 +27,74 @@ function WritePage() {
     }));
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const data = new FormData();
+  //   data.append("title", formData.title);
+  //   data.append("content", formData.description);
+  //   data.append("tags", formData.tags);
+  //   data.append("thumbnail", formData.thumbnail);
+
+  //   try {
+  //     const response = await axios.post("http://localhost:8080/write", data, {
+  //       withCredentials: true, // Include credentials if necessary
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //         Authorization: `Bearer ${localStorage.getItem("token")}`, // Add token for authentication
+  //       },
+  //     });
+  //     console.log("Blog added successfully:", response.data);
+  //     navigate("/"); // Redirect to home page
+  //   } catch (error) {
+  //     console.error("Error adding blog:", error.response?.data || error.message);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found. Please log in.");
+      return;
+    }
+  
+    if (formData.thumbnail && !formData.thumbnail.type.startsWith("image/")) {
+      alert("Please upload a valid image file.");
+      return;
+    }
+  
     const data = new FormData();
     data.append("title", formData.title);
-    data.append("description", formData.description);
-    data.append("tags", formData.tags);
+    data.append("content", formData.description);
+    data.append("tags", formData.tags.split(",").map(tag => tag.trim())); // Convert tags to an array
     data.append("thumbnail", formData.thumbnail);
-
+  
     try {
-      const response = await axios.post("http://localhost:8080/add-blog", data, {
-        withCredentials: true, // Include credentials if necessary
+      const response = await axios.post("http://localhost:8080/write", data, {
+        withCredentials: true,
         headers: {
-          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`, 
         },
       });
-      console.log("Blog added successfully:", response.data);
+      alert("Blog added successfully!");
       navigate("/"); // Redirect to home page
     } catch (error) {
-      console.error("Error adding blog:", error);
+      console.error("Error adding blog:", error.response?.data || error.message);
     }
   };
-
+  
+  
   const handleCancel = () => {
     navigate("/"); 
   };
 
   return (
     <div className="write-page">
-      <h1>Write here</h1>
+      <h1>Write a New Blog</h1>
       <form className="write-container" onSubmit={handleSubmit}>
-        <label>Thumbnail</label>
-        <input type="file" name="thumbnail" onChange={handleFileChange} />
+        <label>Thumbnail (Image)</label>
+        <input type="file" name="thumbnail" onChange={handleFileChange} required />
 
         <label>Title</label>
         <input

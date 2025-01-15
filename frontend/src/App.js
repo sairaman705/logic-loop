@@ -1,40 +1,49 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { SessionProvider } from "./UserAuth";
 import Navbar from "./Components/Navbar";
 import SignIn from "./Pages/SignIn";
 import SignUp from "./Pages/SignUp";
-import WritePage from "./WritePage";
-import Home from "./Pages/Home";
+import WritePage from "./Pages/WritePage";
+// import Home from "./Pages/Home";
+import {createContext, useEffect, useState} from "react";
 
-function App() {
-  const LocationBasedNavbar = ({ children }) => {
-    const location = useLocation();
-    return (
-      <>
-        {/* Render Navbar only if not on the Write page */}
-        {location.pathname !== "/write" && <Navbar />}
-        {children}
-      </>
-    );
-  };
+export const UserContext = createContext({});
+
+const App = () => {
+  const [userAuth, setUserAuth] = useState(null);
+
+  useEffect(()=>{
+    const storedUser = sessionStorage.getItem("userAuth");
+    if(storedUser){
+      setUserAuth(JSON.parse(storedUser));
+    }
+  }, []);
+
+  useEffect(()=>{
+    if(userAuth){
+      sessionStorage.setItem("userAuth", JSON.stringify(userAuth));
+    }
+    else{
+      sessionStorage.removeItem("userAuth");
+    }
+  }, [userAuth]);
 
   return (
-    <SessionProvider>
-      <Router>
-        <LocationBasedNavbar>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
+      <UserContext.Provider value={{userAuth, setUserAuth}}>
+        <Router>
+          {/* <LocationBasedNavbar> */}
+            <Routes>
             <Route path="/write" element={<WritePage />} />
-            
-            <Route path="*" element={<div>404 - Page Not Found</div>} />
-          </Routes>
-        </LocationBasedNavbar>
-      </Router>
-    </SessionProvider>
-  );
+              <Route path="/" element={<Navbar />}>
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="*" element={<div>404 - Page Not Found</div>} />
+              </Route>
+            </Routes>
+          {/* </LocationBasedNavbar> */}
+        </Router>
+      </UserContext.Provider>
+  ); 
 }
 
 export default App;
