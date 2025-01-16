@@ -16,12 +16,9 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
-  profilePicture: {
-    type: String, 
-    default: '', 
-  },
 });
 
-const UserModel = mongoose.model('users', UserSchema);
+const Registermodel = mongoose.model('register', UserSchema);
 
-module.exports = UserModel;
+module.exports = Registermodel;
+

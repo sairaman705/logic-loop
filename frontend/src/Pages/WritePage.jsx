@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -11,6 +11,14 @@ function WritePage() {
   });
 
   const navigate = useNavigate();
+
+  // Check if the user is logged in (i.e., token exists)
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/signin");  
+    }
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -27,66 +35,47 @@ function WritePage() {
     }));
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const data = new FormData();
-  //   data.append("title", formData.title);
-  //   data.append("content", formData.description);
-  //   data.append("tags", formData.tags);
-  //   data.append("thumbnail", formData.thumbnail);
-
-  //   try {
-  //     const response = await axios.post("http://localhost:8080/write", data, {
-  //       withCredentials: true, // Include credentials if necessary
-  //       headers: {
-  //         "Content-Type": "multipart/form-data",
-  //         Authorization: `Bearer ${localStorage.getItem("token")}`, // Add token for authentication
-  //       },
-  //     });
-  //     console.log("Blog added successfully:", response.data);
-  //     navigate("/"); // Redirect to home page
-  //   } catch (error) {
-  //     console.error("Error adding blog:", error.response?.data || error.message);
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const token = localStorage.getItem("token");
+    const authorName = localStorage.getItem("name");
+    console.log("Retrieved name from localStorage:", authorName);
+    console.log("Token:", token);
     if (!token) {
       console.error("No token found. Please log in.");
       return;
     }
-  
+
     if (formData.thumbnail && !formData.thumbnail.type.startsWith("image/")) {
       alert("Please upload a valid image file.");
       return;
     }
-  
+
     const data = new FormData();
     data.append("title", formData.title);
     data.append("content", formData.description);
-    data.append("tags", formData.tags.split(",").map(tag => tag.trim())); // Convert tags to an array
+    data.append("tags", formData.tags.split(",").map(tag => tag.trim())); 
     data.append("thumbnail", formData.thumbnail);
-  
+    data.append("author", authorName);  
+    data.append("date", new Date().toISOString());  
+
     try {
-      const response = await axios.post("http://localhost:8080/write", data, {
+      const response = await axios.post("http://localhost:8080/auth/write", data, {
         withCredentials: true,
         headers: {
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
       });
       alert("Blog added successfully!");
-      navigate("/"); // Redirect to home page
+      navigate("/"); 
     } catch (error) {
       console.error("Error adding blog:", error.response?.data || error.message);
     }
   };
-  
-  
+
   const handleCancel = () => {
-    navigate("/"); 
+    navigate("/");
   };
 
   return (

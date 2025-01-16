@@ -14,7 +14,7 @@ next();
 }
 const signinValidation = (req, res, next) => {
 const schema = Joi.object({
-email: Joi.string().email().required(),
+email: Joi.string().min(3).max(100).required(),
 password: Joi.string().min(4).max(100).required()
 });
 const { error} = schema.validate(req.body);

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {UserContext} from "../App";
 
 function Signin() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -12,12 +12,12 @@ function Signin() {
   const handleSignIn = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:8080/signin", {
+      const response = await fetch("http://localhost:8080/auth/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }), // Send username and password
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -25,8 +25,12 @@ function Signin() {
       if (response.ok) {
         // Save the token (optional, for further authenticated requests)
         localStorage.setItem("token", data.token);
-        setUserAuth({access_token: data.token,
-          user: data.user,
+        localStorage.setItem("name", data.name)
+        console.log("name stored in lpcal storage", data.name);
+
+        setUserAuth({
+          access_token: data.token,
+          user: data.userName,
         });
         // Redirect to the home page
         navigate("/");
@@ -43,12 +47,12 @@ function Signin() {
       <h2>Sign In Page</h2>
       <div className="form-container login-page">
         <form className="row" onSubmit={handleSignIn}>
-          <div className="col">
-            <label>Username</label>
+        <div className="col">
+            <label>Email</label>  
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>

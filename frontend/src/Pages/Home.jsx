@@ -6,7 +6,7 @@ const Home = () => {
 
   useEffect(() => {
     // Fetch blog posts from the backend
-    axios.get('http://localhost:8080/')
+    axios.get('http://localhost:8080/auth/editors')
       .then((response) => {
         console.log('Blog posts:', response.data); 
         setBlogs(response.data);
@@ -30,7 +30,7 @@ const Home = () => {
             <p>{blog.content}</p>
             <p><strong>Category:</strong> {blog.category}</p>
             <p><strong>Tags:</strong> {blog.tags.join(', ')}</p>
-            <div>
+            {/* <div>
               <h3>Comments:</h3>
               {blog.comments.length > 0 ? (
                 blog.comments.map((comment, index) => (
@@ -42,7 +42,7 @@ const Home = () => {
               ) : (
                 <p>No comments yet.</p>
               )}
-            </div>
+            </div> */}
           </div>
         ))
       )}

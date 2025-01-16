@@ -25,24 +25,21 @@ function SignUp() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!userName || !userEmail || !userPassword || !userImage) {
+        if (!userName || !userEmail || !userPassword) {
             alert("All fields are required, including the profile picture.");
             return;
         }
 
-        const formData = new FormData();
-        formData.append("username", userName);
-        formData.append("email", userEmail);
-        formData.append("password", userPassword);
-        formData.append("profilePicture", userImage);
-
+        const payload = {
+            "name" : userName,
+            "email": userEmail,
+            "password" : userPassword
+        };
+        console.log("payload : ", payload);
         try {
-          const response = await axios({
-            method: "POST", 
-            url: "http://localhost:8080/auth/signup",
-            data: formData,
-            headers: { "Content-Type": "multipart/form-data" }, 
-          });
+            const response = await axios.post("http://localhost:8080/auth/signup", payload, {
+                headers: { "Content-Type": "application/json" },
+            });
             if (response.data.success) {
                 alert(response.data.message);
                 navigate("/signin");
