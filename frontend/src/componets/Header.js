@@ -41,6 +41,13 @@ const Header = () => {
                 LinkComponent={Link}
                 to="/blogs"
                 label="All Blogs"
+              /> 
+
+              <Tab
+                //className={classes.font}
+                LinkComponent={Link}
+                to="/myBlogs"
+                label="My Blogs"
               />
               
               <Tab

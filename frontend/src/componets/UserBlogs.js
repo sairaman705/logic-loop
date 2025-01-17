@@ -1,9 +1,9 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Blogs from "./Blogs";
 import DeleteButton from "./DeleteBlogs";
 import { makeStyles } from "@mui/styles";
+import { Typography } from "@mui/material";
 import config from "../config";
 
 const useStyles = makeStyles((theme) => ({
@@ -30,22 +30,6 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "10px",
     marginBottom: "10px",
   },
-  editButton: {
-    background: "#f0f0f0",
-    border: "none",
-    padding: "5px 10px",
-    borderRadius: "5px",
-    cursor: "pointer",
-    marginTop: "10px",
-    fontSize: "14px",
-  },
-  deleteButton: {
-    position: "absolute",
-    right: 10,
-    top: 10,
-    color: "red",
-    cursor: "pointer",
-  },
 }));
 
 const UserBlogs = () => {
@@ -54,27 +38,39 @@ const UserBlogs = () => {
   const id = localStorage.getItem("userId");
 
   const sendRequest = async () => {
-    const res = await axios
-      .get(`http://localhost:5000/api/blogs/user/${id}`)
-      .catch((err) => console.log(err));
-    const data = await res.data;
-    return data;
+    try {
+      const res = await axios.get(`http://localhost:5000/api/blogs/user/${id}`);
+      return res.data; // Only return data if the request is successful
+    } catch (err) {
+      console.error("Error fetching user blogs:", err);
+      return null; // Return null if there's an error
+    }
   };
 
   useEffect(() => {
-    sendRequest().then((data) => setUser(data.user));
+    sendRequest().then((data) => {
+      if (data) {
+        setUser(data.user); // Update state only if data exists
+      }
+    });
   }, []);
 
   const handleDelete = (blogId) => {
-    axios.delete(`${config.BASE_URL}/api/blogs/${blogId}`).then(() => {
-      sendRequest().then((data) => setUser(data.user));
-    });
+    axios
+      .delete(`${config.BASE_URL}/api/blogs/${blogId}`)
+      .then(() => {
+        sendRequest().then((data) => {
+          if (data) {
+            setUser(data.user);
+          }
+        });
+      })
+      .catch((err) => console.error("Error deleting blog:", err));
   };
 
   return (
     <div className={classes.container}>
-      {user &&
-        user.blogs &&
+      {user && user.blogs && user.blogs.length > 0 ? (
         user.blogs.map((blog, index) => (
           <div key={index} className={classes.blogContainer}>
             <Blogs
@@ -92,7 +88,12 @@ const UserBlogs = () => {
             />
             <DeleteButton blogId={blog._id} onDelete={handleDelete} />
           </div>
-        ))}
+        ))
+      ) : (
+        <Typography variant="h6" color="textSecondary">
+          No blogs found for this user.
+        </Typography>
+      )}
     </div>
   );
 };
