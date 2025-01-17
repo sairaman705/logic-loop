@@ -1,26 +1,23 @@
-require('dotenv').config(); // Load environment variables at the start
+const express = require("express");
+const userRouter = require("./routes/user-routes");
+const blogRouter = require("./routes/blog-routes");
+require("./config/db");
+const cors = require("cors");
 
-const express = require('express');
 const app = express();
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const AuthRouter = require('./Routes/AuthRouter');
-const PORT = process.env.PORT || 8080;
 
-console.log('MongoDB URI:', process.env.MONGO_URI); // Debug: Print MongoDB URI
+app.use(cors());
 
-require('./Models/db.js');
+app.set("view engine", "ejs");
+app.use(express.json());
 
-app.use(bodyParser.json());
-app.use(cors({
-  origin: 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
+app.use("/api/users", userRouter);
+app.use("/api/blogs", blogRouter);
 
-app.use('/auth', AuthRouter);
-
-app.listen(PORT, () => {
-  console.log(`Server is running on ${PORT}`);
+app.use("/api", (req, res, next) => {
+  res.send("hello");
 });
+
+//define port
+
+app.listen(5001, () => console.log("app started at 5001..."));

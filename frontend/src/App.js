@@ -1,49 +1,31 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import Navbar from "./Components/Navbar";
-import SignIn from "./Pages/SignIn";
-import SignUp from "./Pages/SignUp";
-import WritePage from "./Pages/WritePage";
-// import Home from "./Pages/Home";
-import {createContext, useEffect, useState} from "react";
+import './App.css';
+import { Route, Routes } from "react-router-dom";
+import Header from './componets/Header';
+import React from 'react';
+import Login from './componets/Login';
+import Blogs from './componets/Blogs';
+import UserBlogs from './componets/UserBlogs'
+import AddBlogs from './componets/AddBlogs'
+import BlogDetail from './componets/BlogDetail'
 
-export const UserContext = createContext({});
 
-const App = () => {
-  const [userAuth, setUserAuth] = useState(null);
 
-  useEffect(()=>{
-    const storedUser = sessionStorage.getItem("userAuth");
-    if(storedUser){
-      setUserAuth(JSON.parse(storedUser));
-    }
-  }, []);
+function App() {
+  return <React.Fragment>
+    <header>
+      <Header/>
+    </header>
+    <main>
+    <Routes>
+      <Route path="/login" element={<Login/>}></Route>
+      <Route path="/blogs" element={<Blogs/>}></Route>
+      <Route path="/myBlogs" element={<UserBlogs/>}></Route>
+      <Route path="/myBlogs/:id" element={<BlogDetail/>}></Route>
+      <Route path="/blogs/add" element={<AddBlogs />} />
+    </Routes>
+    </main>
 
-  useEffect(()=>{
-    if(userAuth){
-      sessionStorage.setItem("userAuth", JSON.stringify(userAuth));
-    }
-    else{
-      sessionStorage.removeItem("userAuth");
-    }
-  }, [userAuth]);
-
-  return (
-      <UserContext.Provider value={{userAuth, setUserAuth}}>
-        <Router>
-          {/* <LocationBasedNavbar> */}
-            <Routes>
-            <Route path="/write" element={<WritePage />} />
-              <Route path="/" element={<Navbar />}>
-                <Route path="/signin" element={<SignIn />} />
-                <Route path="/signup" element={<SignUp />} />
-                <Route path="*" element={<div>404 - Page Not Found</div>} />
-              </Route>
-            </Routes>
-          {/* </LocationBasedNavbar> */}
-        </Router>
-      </UserContext.Provider>
-  ); 
+  </React.Fragment>;
 }
 
 export default App;
