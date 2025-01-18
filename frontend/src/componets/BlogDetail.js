@@ -11,21 +11,25 @@ const BlogDetail = () => {
   const navigate = useNavigate();
   const [blog, setBlog] = useState();
   const id = useParams().id;
-  console.log(id);
   const [inputs, setInputs] = useState({});
+
   const handleChange = (e) => {
     setInputs((prevState) => ({
       ...prevState,
       [e.target.name]: e.target.value,
     }));
   };
+
   const fetchDetails = async () => {
-    const res = await axios
-      .get(`${config.BASE_URL}/api/blogs/${id}`)
-      .catch((err) => console.log(err));
-    const data = await res.data;
-    return data;
+    try {
+      const res = await axios.get(`${config.BASE_URL}/api/blogs/${id}`);
+      const data = await res.data;
+      return data;
+    } catch (err) {
+      console.error(err);
+    }
   };
+
   useEffect(() => {
     fetchDetails().then((data) => {
       setBlog(data.blog);
@@ -35,24 +39,31 @@ const BlogDetail = () => {
       });
     });
   }, [id]);
+
   const sendRequest = async () => {
-    const res = await axios
-      .put(`${config.BASE_URL}/api/blogs/update/${id}`, {
+    try {
+      const res = await axios.put(`${config.BASE_URL}/api/blogs/update/${id}`, {
         title: inputs.title,
         description: inputs.description,
-      })
-      .catch((err) => console.log(err));
-
-    const data = await res.data;
-    return data;
+      });
+      const data = await res.data;
+      return data;
+    } catch (err) {
+      console.error(err);
+      throw new Error("Failed to update the blog.");
+    }
   };
-  console.log(blog);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(inputs);
     sendRequest()
-      .then((data) => console.log(data))
-      .then(() => navigate("/myBlogs/"));
+      .then((data) => {
+        alert("Blog updated successfully!");
+        navigate("/myBlogs/");
+      })
+      .catch((err) => {
+        alert(err.message || "Failed to update the blog!");
+      });
   };
 
   return (

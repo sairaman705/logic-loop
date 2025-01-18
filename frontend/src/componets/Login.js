@@ -1,4 +1,4 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography, Snackbar, Alert } from "@mui/material";
 import React, { useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -7,52 +7,99 @@ import { useNavigate } from "react-router-dom";
 import config from "../config";
 
 const Login = () => {
-  const naviagte = useNavigate();
-  const dispath = useDispatch();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [inputs, setInputs] = useState({
     name: "",
     email: "",
     password: "",
   });
   const [isSignup, setIsSignup] = useState(false);
+  const [message, setMessage] = useState("");
+  const [severity, setSeverity] = useState("success"); // 'success' or 'error'
+  const [open, setOpen] = useState(false);
+
   const handleChange = (e) => {
     setInputs((prevState) => ({
       ...prevState,
       [e.target.name]: e.target.value,
     }));
   };
+
   const sendRequest = async (type = "login") => {
-    console.log("inside send req");
-    console.log(`${config.BASE_URL}/api/users/${type}`);
-    const res = await axios
-      .post(`${config.BASE_URL}/api/users/${type}`, {
+    try {
+      const res = await axios.post(`${config.BASE_URL}/api/users/${type}`, {
         name: inputs.name,
         email: inputs.email,
         password: inputs.password,
-      })
-      .catch((err) => console.log(err));
-
-    const data = await res.data;
-    console.log("return");
-    console.log(data);
-    return data;
+      });
+      return res.data;
+    } catch (err) {
+      console.error(err);
+      throw new Error(err.response?.data?.message || "Login Error, Please Try Aggain with Correct Details");
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(inputs);
+
+    // Input Validation
+    if (isSignup && !inputs.name.trim()) {
+      setMessage("Name is required for signup!");
+      setSeverity("error");
+      setOpen(true);
+      return;
+    }
+    if (!inputs.email.trim()) {
+      setMessage("Email is required!");
+      setSeverity("error");
+      setOpen(true);
+      return;
+    }
+    if (!inputs.password.trim()) {
+      setMessage("Password is required!");
+      setSeverity("error");
+      setOpen(true);
+      return;
+    }
+
     if (isSignup) {
       sendRequest("signup")
-        .then((data) => localStorage.setItem("userId", data.user._id))
-        .then(() => dispath(authActions.login()))
-        .then(() => naviagte("/login"));
+        .then((data) => {
+          localStorage.setItem("userId", data.user._id);
+          dispatch(authActions.login());
+          setMessage("Signup successful!");
+          setSeverity("success");
+          setOpen(true);
+          navigate("/login");
+        })
+        .catch((err) => {
+          setMessage(err.message || "Signup failed!");
+          setSeverity("error");
+          setOpen(true);
+        });
     } else {
       sendRequest()
-        .then((data) => localStorage.setItem("userId", data.user._id))
-        .then(() => dispath(authActions.login()))
-        .then(() => naviagte("/blogs"));
+        .then((data) => {
+          localStorage.setItem("userId", data.user._id);
+          dispatch(authActions.login());
+          setMessage("Login successful!");
+          setSeverity("success");
+          setOpen(true);
+          navigate("/blogs");
+        })
+        .catch((err) => {
+          setMessage(err.message || "Login failed!");
+          setSeverity("error");
+          setOpen(true);
+        });
     }
   };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -78,8 +125,9 @@ const Login = () => {
               value={inputs.name}
               placeholder="Name"
               margin="normal"
+              required
             />
-          )}{" "}
+          )}
           <TextField
             name="email"
             onChange={handleChange}
@@ -87,6 +135,7 @@ const Login = () => {
             type={"email"}
             placeholder="Email"
             margin="normal"
+            required
           />
           <TextField
             name="password"
@@ -95,6 +144,7 @@ const Login = () => {
             type={"password"}
             placeholder="Password"
             margin="normal"
+            required
           />
           <Button
             type="submit"
@@ -112,6 +162,12 @@ const Login = () => {
           </Button>
         </Box>
       </form>
+      {/* Snackbar for Alerts */}
+      <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
+          {message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

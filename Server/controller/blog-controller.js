@@ -4,18 +4,16 @@ const Blog = require("../model/Blog");
 const User = require("../model/User");
 
 const getAllBlogs = async(req,res,next) =>{
-    let blogs;
-    try{
-        blogs = await Blog.find();
-    }catch(e){
-        console.log(e);
+    
+    try {
+        const blogs = await Blog.find();
+        if(!blogs){ 
+            return res.status(404).json({message : " No blogs found"}); 
+        }
+        return res.status(200).json({blogs});
+    } catch (e) {
+        return res.status(500).json({message: "Error fetching blogs"});
     }
-
-    if(!blogs){
-        return res.status(404).json({message : " No blogs found"});
-    }
-
-    return res.status(200).json({blogs});
 }
 
 // const addBlog = async(req,res,next) =>{
@@ -170,6 +168,19 @@ const getByUserId = async (req, res, next) => {
       return res.status(404).json({ message: "No Blog Found" });
     }
     return res.status(200).json({ user: userBlogs });
-  };
+};
 
-module.exports = { getAllBlogs ,addBlog , updateBlog , getById ,deleteBlog , getByUserId} ;
+const getMyBlogs = async (req, res, next) => {
+    const userId = req.userId; 
+    try {
+        const userBlogs = await Blog.find({ user: userId }).populate("user");
+        if(!userBlogs || userBlogs.length === 0){
+            return res.status(404).json({ message: "No blogs found for this user" });
+        }
+        return res.status(200).json({ blogs: userBlogs });
+    } catch (err) {
+        return res.status(500).json({ message: err.message });
+    }
+};
+
+module.exports = { getAllBlogs ,addBlog , updateBlog , getById ,deleteBlog , getByUserId, getMyBlogs} ;
